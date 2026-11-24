@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Porin Pokeri – tallennuksen siirto</title>
+<style>
+body{margin:0;background:#0e0c08;color:#eee3c4;font-family:system-ui,Segoe UI,sans-serif;display:flex;justify-content:center;padding:30px 14px}
+.box{max-width:640px;width:100%;background:#17140e;border:1px solid #6b5527;border-radius:16px;padding:22px}
+h1{font-family:Georgia,serif;color:#f3d98b;margin:0 0 6px;font-size:28px}
+.ok{color:#8fe3a1}.no{color:#ff9b8a}
+table{width:100%;border-collapse:collapse;margin:10px 0}td{padding:5px 6px;border-top:1px solid #2c261a}td:last-child{text-align:right;font-weight:700}
+button{min-height:52px;min-width:200px;font-size:18px;font-weight:800;border-radius:12px;border:0;background:linear-gradient(180deg,#f0d385,#c99a40);color:#1b1408;cursor:pointer;margin-top:10px}
+textarea{width:100%;height:90px;margin-top:10px;background:#0b0a07;color:#bba;border:1px solid #3a3222;border-radius:8px;font-size:11px}
+small{opacity:.75}
+</style></head><body><div class="box">
+<h1>Porin Pokeri – siirto</h1>
+<div id="out"></div>
+</div>
+<script>
+const KEYS=['porinpokeri','pp_wallet','pp_shop','pp_stats','pp_trophy','pp_ach','pp_mem','pp_daily','pp_opts','pp_music','pp_time','pp_chatused','pp_save','pp_saved'];
+const N={juha:'Juha',veeti:'Veeti',juho:'Juho',nelli:'Nelli',sami:'Sami',nalle:'Nalle',lokki:'Lokki'};
+const fmt=n=>Math.round(n).toLocaleString('fi-FI');
+const J=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
+const o={}; KEYS.forEach(k=>{const v=localStorage.getItem(k); if(v!=null) o[k]=v;});
+const out=document.getElementById('out');
+if(!Object.keys(o).length){ out.innerHTML='<p class="no"><b>Tästä selaimesta ei löytynyt Porin Pokerin tallennuksia.</b></p><p>Kokeile avata tämä sama sivu toisella selaimella (esim. Edge, Chrome tai Firefox), jolla olet pelannut.</p>'; }
+else{
+  const code='PP1:'+btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+  const w=J('pp_wallet')||{}, sv=J('pp_saved'), au=J('pp_save');
+  const d=t=>new Date(t).toLocaleString('fi-FI',{day:'numeric',month:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  let h='<p class="ok"><b>Tallennus löytyi!</b></p>';
+  h+=sv&&sv.ts?`<p>Tallennettu peli: <b>${d(sv.ts)}</b> · jako ${(sv.handNo||0)+1}</p>`:'<p>Ei Tallenna peli -tallennusta.</p>';
+  if(au&&au.ts) h+=`<p>Keskeneräinen peli: <b>${d(au.ts)}</b></p>`;
+  h+='<table>'+Object.keys(w).map(k=>`<tr><td>${N[k]||k}</td><td>${fmt(w[k].bal||0)} €</td></tr>`).join('')+'</table>';
+  h+='<button id="cp">KOPIOI TALLENNUS</button><p id="msg"></p><textarea id="ta" readonly>'+code+'</textarea>';
+  h+='<p><small>Avaa sitten uusi peli (PELAA PORIN POKERIA), mene <b>Asetukset → Siirrä tallennus → Liitä tallennus</b>, liitä koodi (Ctrl+V) ja paina <b>TUO TALLENNUS</b>.</small></p>';
+  out.innerHTML=h;
+  const ta=document.getElementById('ta');
+  document.getElementById('cp').onclick=()=>{ ta.focus(); ta.select(); let ok=false; try{ok=document.execCommand('copy')}catch(e){} try{navigator.clipboard.writeText(code).then(()=>ok=true)}catch(e){} document.getElementById('msg').innerHTML='<span class="ok">Kopioitu leikepöydälle.</span>'; };
+}
+</script></body></html>
